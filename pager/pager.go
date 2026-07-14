@@ -23,5 +23,18 @@ type Pager struct {
 }
 
 func CreatePager(Path string) (*Pager, error) {
-
+	file, err := os.OpenFile(Path, os.O_RDWR|os.O_CREATE, 0o644)
+	if err != nil {
+		return nil, err
+	}
+	FileInfo, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	Pages := FileInfo.Size() / PageSize
+	return &Pager{
+		file:        file,
+		pagesNumber: int(Pages),
+		pagecache:   make(map[uint32]*Page),
+	}, nil
 }
