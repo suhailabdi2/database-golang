@@ -38,3 +38,18 @@ func CreatePager(Path string) (*Pager, error) {
 		pagecache:   make(map[uint32]*Page),
 	}, nil
 }
+func (p *Pager) ReadPage(pageID uint32) (Page, error) {
+	if PageValue, ok := p.pagecache[pageID]; ok {
+		return *PageValue, nil
+	}
+	ByteOffset := PageSize * int(pageID)
+	page := make([]byte, PageSize)
+	_, err := p.file.ReadAt(page, int64(ByteOffset))
+	if err != nil {
+		return Page{}, err
+	}
+	var P Page
+	copy(P[:], page)
+	p.pagecache[pageID] = &P
+	return P, nil
+}
